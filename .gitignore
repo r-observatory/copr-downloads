@@ -1,0 +1,20 @@
+# Build artifacts and data
+*.db
+out/
+tmp/
+tmp_smoke/
+release_notes.md
+
+# R session files
+.Rhistory
+.RData
+.Rproj.user
+
+# OS
+.DS_Store
+
+# Local working docs (specs/plans) — never published
+docs/
+
+# Test fixtures are data files but MUST be tracked
+!tests/testthat/fixtures/**
