@@ -192,3 +192,7 @@ Download figures are read from the public [iucar/cran](https://copr.fedorainfrac
 ## License
 
 The pipeline code in this repository is proprietary. Copyright (c) 2026 HJJB, LLC. All rights reserved; see [LICENSE](LICENSE). The underlying download figures originate from Fedora Copr.
+
+## Feedback
+
+Found a bug, a wrong number, or a missing package? Report it at [r-observatory/feedback](https://github.com/r-observatory/feedback/issues/new/choose). All feedback about R Observatory, the site, the data, and the pipelines, is tracked in one place.
