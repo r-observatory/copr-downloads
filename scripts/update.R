@@ -169,10 +169,13 @@ run_update <- function(io, out_dir, force_full = FALSE) {
   # Integrity / completeness core for the summary DB the downstream merge pulls.
   # Computed from the finalized on-disk copr-downloads-summary.db (written just
   # above) so db_bytes/db_sha256 describe the exact bytes uploaded to the release.
-  # The summary is a full teardown-and-rebuild each run (build_summary) over the
-  # always-loaded rolling recent window (RECENT_WINDOW_DAYS = 400); every summary
-  # download metric spans at most 90 days, well inside that window, so it is a
-  # complete snapshot: complete = TRUE.
+  #
+  # complete = TRUE: the DB holds the full, non-partial dataset, not an
+  # incremental/partial one. The summary is a full teardown-and-rebuild each run
+  # (build_summary) over the always-loaded rolling recent window
+  # (RECENT_WINDOW_DAYS = 400); every summary download metric spans at most 90
+  # days, well inside that window, so every run yields a complete snapshot.
+  # Freshness is tracked separately via generated_at and the fingerprint.
   integrity_core <- summary_integrity_core(summary_path, complete = TRUE)
 
   out <- list(
