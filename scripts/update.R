@@ -161,9 +161,22 @@ run_update <- function(io, out_dir, force_full = FALSE) {
   r_repo  <- repo_all[repo_all$date >= win_cut, , drop = FALSE]
   export_shard(recent_path, r_rpm, r_repo)
   embed_summary(recent_path, summary_df)
-  export_summary_shard(file.path(out_dir, "copr-downloads-summary.db"), summary_df)
+  summary_path <- file.path(out_dir, "copr-downloads-summary.db")
+  export_summary_shard(summary_path, summary_df)
   changed_shards <- c(changed_shards, "copr-downloads-recent.db", "copr-downloads-summary.db")
   shard_updates[["copr-downloads-recent.db"]] <- coverage(r_rpm)
+
+  # Integrity / completeness core for the summary DB the downstream merge pulls.
+  # Computed from the finalized on-disk copr-downloads-summary.db (written just
+  # above) so db_bytes/db_sha256 describe the exact bytes uploaded to the release.
+  #
+  # complete = TRUE: the DB holds the full, non-partial dataset, not an
+  # incremental/partial one. The summary is a full teardown-and-rebuild each run
+  # (build_summary) over the always-loaded rolling recent window
+  # (RECENT_WINDOW_DAYS = 400); every summary download metric spans at most 90
+  # days, well inside that window, so every run yields a complete snapshot.
+  # Freshness is tracked separately via generated_at and the fingerprint.
+  integrity_core <- summary_integrity_core(summary_path, complete = TRUE)
 
   out <- list(
     tag            = sprintf("v%s", format(now, "%Y%m%d-%H%M%S", tz = "UTC")),
@@ -179,7 +192,7 @@ run_update <- function(io, out_dir, force_full = FALSE) {
       chroots     = nrow(summary_df),
       latest_date = today_str,
       rpms_total  = if (nrow(summary_df)) sum(summary_df$rpms_total, na.rm = TRUE) else 0))
-  write_manifest(manifest_path, out)
+  write_manifest(manifest_path, out, core = integrity_core)
   write_release_notes(file.path(out_dir, "release_notes.md"), out)
   list(changed_shards = changed_shards, manifest = out)
 }
